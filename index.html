@@ -24,6 +24,7 @@
 <script>
     var editor = ace.edit("editor");
     editor.session.setMode("ace/mode/html");
+    editor.session.setOption("useWorker", false);
     
     // Enable Emmet
     editor.setOption("enableEmmet", true);
