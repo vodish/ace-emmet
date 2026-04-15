@@ -16489,7 +16489,9 @@
               abbreviations: {
                 "!": "html:5",
                 a: '<a href="">',
+                A: '<a href="">',
                 ab: '<a href="" target="_blank">',
+                Ab: '<a href="" target="_blank">',
                 "a:link": '<a href="http://|">',
                 "a:mail": '<a href="mailto:|">',
                 abbr: '<abbr title="">',
