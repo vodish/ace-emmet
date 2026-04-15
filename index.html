@@ -19,14 +19,12 @@
 <script src="i/ace/ace.js"></script>
 <script src="i/ace/mode-html.js"></script>
 <script src="i/ace/mode-yaml.js"></script>
-<script src="i/ace/ext-emmet.js"></script>
 <script src="i/ace/emmet.js"></script>
+<script src="i/ace/ext-emmet.js"></script>
 <script>
     var editor = ace.edit("editor");
     editor.session.setOption("useWorker", false);
     editor.session.setMode("ace/mode/html");
-    
-    // Enable Emmet
     editor.setOption("enableEmmet", true);
     
     // Add handler for mobile '¬' key (often maps to backtick/tilde on mobile keyboards)
@@ -42,7 +40,8 @@
 
     // Button handler for mobile
     document.getElementById('emmet-btn').addEventListener('click', function() {
-        editor.execCommand("emmet:expand_abbreviation");
+      editor.execCommand("emmet:expand_abbreviation");
+      
     });
 </script>
 </body>
