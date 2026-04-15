@@ -13,7 +13,6 @@
 </head>
 <body>
 
-<button id="emmet-btn">Emmet</button>
 <div id="editor"></div>
     
 <script src="i/ace/ace.js"></script>
@@ -27,22 +26,6 @@
     editor.session.setMode("ace/mode/html");
     editor.setOption("enableEmmet", true);
     
-    // Add handler for mobile '¬' key (often maps to backtick/tilde on mobile keyboards)
-    editor.commands.addCommand({
-        name: "emmetExpandOnMobile",
-        bindKey: { win: "¬", mac: "¬" },
-        exec: function(edt) {
-            // Trigger Emmet expansion
-            edt.execCommand("emmet:expand_abbreviation");
-        },
-        multiSelectAction: "forEach"
-    });
-
-    // Button handler for mobile
-    document.getElementById('emmet-btn').addEventListener('click', function() {
-      editor.execCommand("emmet:expand_abbreviation");
-      
-    });
 </script>
 </body>
 </html>
