@@ -1112,7 +1112,7 @@
           );
         })(),
         c = {
-          expand_abbreviation: { mac: "ctrl+alt+e", win: "alt+e" },
+          expand_abbreviation: { mac: "¿", win: "¿" },
           match_pair_outward: { mac: "ctrl+d", win: "ctrl+," },
           match_pair_inward: { mac: "ctrl+j", win: "ctrl+shift+0" },
           matching_pair: { mac: "ctrl+alt+j", win: "alt+j" },
