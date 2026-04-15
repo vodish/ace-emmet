@@ -4,17 +4,16 @@
 <title>ACE in Action</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <style type="text/css" media="screen">
-    #editor { 
-        position: absolute;
-        top: 0;
-        right: 0;
-        bottom: 0;
-        left: 0;
+    #editor {
+      height: 90vh;
+      margin-top: 1em;
     }
+    
 </style>
 </head>
 <body>
 
+<button id="emmet-btn">Emmet</button>
 <div id="editor"></div>
     
 <script src="i/ace/ace.js"></script>
@@ -38,6 +37,11 @@
             edt.execCommand("emmet:expand_abbreviation");
         },
         multiSelectAction: "forEach"
+    });
+
+    // Button handler for mobile
+    document.getElementById('emmet-btn').addEventListener('click', function() {
+        editor.execCommand("emmet:expand_abbreviation");
     });
 </script>
 </body>
