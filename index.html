@@ -10,10 +10,10 @@
       display: flex;
     }
     .flex #edt {
-        width: 70%;
+        width: 50%;
     }
     .flex #raw {
-        width: 30%;
+        width: 50%;
         border: solid 1px red;
         overflow: auto;
         font-family: monospace;
@@ -48,27 +48,17 @@
 var editor = ace.edit("edt");
 editor.session.setOption("useWorker", false);
 editor.session.setMode("ace/mode/html");
-editor.setValue('id линии\nid линии\n');
+editor.setValue('one\ntwo\n');
 
 function updateRaw() {
-    var raw = document.getElementById('raw');
-    if (!raw) return;
-    var textLayer = editor.renderer.$textLayer;
-    if (!textLayer) return;
-    var lines = textLayer.$lines;
-    if (!lines || !lines.cells) return;
-    var cells = lines.cells;
-    var html = '';
-    for (var i = 0; i < cells.length; i++) {
-        var cell = cells[i];
-        html += '<div>' + i + ' = ' + (cell.id || '?') + '</div>';
-    }
-    raw.innerHTML = html;
+    var lines = editor.renderer.$textLayer.$lines;
+    
+    var raw = document.getElementById('raw')
+    raw.innerHTML = lines.cells.map(c => `<div>[${c.id}]</div>`).join('');
 }
 
 // обновлять при изменении
 editor.on('change', updateRaw);
-updateRaw()
 </script>
 </body>
 </html>

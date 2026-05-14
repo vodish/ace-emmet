@@ -15291,8 +15291,6 @@
                 (i && i(o),
                   this.element.appendChild(o),
                   (s = { element: o, text: "", row: e, id: this.nextCellId++ }));
-              } else if (s.id === undefined) {
-                s.id = this.nextCellId++;
               }
               return ((s.row = e), s);
             }),
