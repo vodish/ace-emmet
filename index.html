@@ -4,16 +4,26 @@
 <title>ACE in Action</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <style type="text/css" media="screen">
-    #editor {
+    .flex {
       height: 90vh;
       margin-top: 1em;
+      display: flex;
     }
-    
+    .flex #edt {
+        width: 50%;
+    }
+    .flex #raw {
+        width: 50%;
+        border: solid 1px red;
+    }
 </style>
 </head>
 <body>
 
-<div id="editor"></div>
+<div class="flex">
+    <div id="edt"></div>
+    <div id="raw"></div>
+</div>
     
 <script src="i/ace/ace.js"></script>
 <script src="i/ace/mode-html.js"></script>
@@ -21,7 +31,7 @@
 <script src="i/ace/emmet-cut.js?13"></script>
 <script src="i/ace/ext-emmet.js?13"></script>
 <script>
-    var editor = ace.edit("editor");
+    var editor = ace.edit("edt");
     editor.session.setOption("useWorker", false);
     editor.session.setMode("ace/mode/html");
     
