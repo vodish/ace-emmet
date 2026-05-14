@@ -12,31 +12,26 @@
     .flex #edt {
         width: 50%;
     }
-    .flex #raw {
+    .flex #ids {
         width: 50%;
         border: solid 1px red;
         overflow: auto;
         font-family: monospace;
-        white-space: pre;
-        background: #f9f9f9;
+        font-size: 10px;
     }
-    #raw div {
+    #ids div {
         border-bottom: 1px dotted #ccc;
         padding: 2px 4px;
         position: relative;
     }
     
-    
-    /* .ace_invisible {
-        display: none !important;
-    } */
 </style>
 </head>
 <body>
 
 <div class="flex">
     <div id="edt"></div>
-    <div id="raw"></div>
+    <div id="ids"></div>
 </div>
     
 <script src="i/ace/ace.js"></script>
@@ -48,17 +43,20 @@
 var editor = ace.edit("edt");
 editor.session.setOption("useWorker", false);
 editor.session.setMode("ace/mode/html");
-editor.setValue('one\ntwo\n');
 
-function updateRaw() {
+function updateids() {
     var lines = editor.renderer.$textLayer.$lines;
-    
-    var raw = document.getElementById('raw')
-    raw.innerHTML = lines.cells.map(c => `<div>[${c.id}]</div>`).join('');
+    var ids = document.getElementById('ids')
+    ids.innerHTML = lines.cells.map(c => `<div>[${c.id}]</div>`).join('');
 }
 
+editor.setValue('one\ntwo\n');
+
 // обновлять при изменении
-editor.on('change', updateRaw);
+// обновить после рендера
+editor.on('change', updateids);
+editor.renderer.on("afterRender", updateids);
+
 </script>
 </body>
 </html>
