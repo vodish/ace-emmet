@@ -5326,7 +5326,7 @@
             }
             var r = this.lead.getPosition();
             while (r.column > 0) {
-              var i = this.doc.getLine(r.row).charCodeAt(r.column - 1);
+              var i = this.doc.getLine(r.row).charCodeAt(r.column);
               if (i !== 8203 && i !== 8204) break;
               this.moveCursorBy(0, -1);
               r = this.lead.getPosition();
