@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <style type="text/css" media="screen">
     .flex {
-      height: 90vh;
+      height: 30vh;
       margin-top: 1em;
       display: flex;
     }
@@ -25,6 +25,11 @@
         position: relative;
     }
     
+    .debug {
+        font-family: monospace;
+        font-size: 8px;
+        gap: 2rem;
+    }
 </style>
 </head>
 <body>
@@ -33,6 +38,19 @@
     <div id="edt"></div>
     <div id="ids"></div>
 </div>
+
+<div class="flex debug">
+    <div>
+        <div>cells</div>
+        <pre id="cells"></pre>
+    </div>
+    <div>
+        <div>cellCache</div>
+        <pre id="cellCache"></pre>
+    </div>
+</div>
+
+
     
 <script src="i/ace/ace.js"></script>
 <script src="i/ace/mode-html.js"></script>
@@ -45,16 +63,29 @@ editor.session.setOption("useWorker", false);
 editor.session.setMode("ace/mode/html");
 
 function updateids() {
+    // источник
     var lines = editor.renderer.$textLayer.$lines;
-    var ids = document.getElementById('ids')
-    ids.innerHTML = lines.cells.map(c => `<div>[${c.id}]</div>`).join('');
+    console.log(lines.cells);
+    
+    var getData     = ({row, id, element}) => ({row, id, cont: element.textContent})
+    var cells       = lines.cells.map(getData)
+    var cache       = lines.cellCache.map(getData)
+
+    // отображение
+    var _ids                = document.getElementById('ids')
+    var _cells              = document.getElementById('cells')
+    var _cellCache          = document.getElementById('cellCache')
+    _ids.innerHTML          = cells.map(c => `<div>[${c.id}]</div>`).join('');
+    _cells.innerHTML        = JSON.stringify(cells, null, 2)
+    _cellCache.innerHTML    = JSON.stringify(cache, null, 2)
+
 }
 
 editor.setValue('one\ntwo\n');
 
 // обновлять при изменении
+// editor.on('change', updateids);
 // обновить после рендера
-editor.on('change', updateids);
 editor.renderer.on("afterRender", updateids);
 
 </script>
