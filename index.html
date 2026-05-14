@@ -65,45 +65,62 @@
 <script>
 // ============================================
 // ID Store - tracks unique IDs for text lines
+// ID is bound to the cell element and follows it when moved
 // ============================================
 var LineIdStore = (function() {
-    // Map: textContent -> id
-    var textToId = Object.create(null);
-    // Map: id -> textContent (for reverse lookup)
-    var idToText = Object.create(null);
+    // WeakMap: cell.element -> id (ID travels with the DOM element)
+    var elementToId = new WeakMap();
+    // Map: id -> { text, lastRow } (track what text each ID represents)
+    var idToInfo = Object.create(null);
     // Counter for generating new unique IDs
     var nextId = 0;
     
     return {
-        // Get or create ID for given text content
-        getId: function(text) {
-            if (textToId[text] !== undefined) {
-                return textToId[text];
+        // Get or create ID for a cell element
+        getIdForElement: function(element, row, text) {
+            // Check if this element already has an ID
+            if (elementToId.has(element)) {
+                var existingId = elementToId.get(element);
+                // Update the info with current row and text
+                idToInfo[existingId].text = text;
+                idToInfo[existingId].lastRow = row;
+                return existingId;
             }
-            // New text, assign new unique ID
+            
+            // New element - assign new unique ID
             var newId = nextId++;
-            textToId[text] = newId;
-            idToText[newId] = text;
+            elementToId.set(element, newId);
+            idToInfo[newId] = { text: text, lastRow: row, element: element };
             return newId;
         },
         
-        // Get text content by ID
-        getText: function(id) {
-            return idToText[id];
+        // Get ID by row (helper for display)
+        getIdByRow: function(row) {
+            // Find ID that has this lastRow
+            for (var id in idToInfo) {
+                if (idToInfo[id].lastRow === row) {
+                    return parseInt(id);
+                }
+            }
+            return undefined;
+        },
+        
+        // Get info by ID
+        getInfoById: function(id) {
+            return idToInfo[id];
         },
         
         // Reset store (for debugging)
         reset: function() {
-            textToId = Object.create(null);
-            idToText = Object.create(null);
+            elementToId = new WeakMap();
+            idToInfo = Object.create(null);
             nextId = 0;
         },
         
         // Get current state for debugging
         getState: function() {
             return {
-                textToId: textToId,
-                idToText: idToText,
+                idToInfo: idToInfo,
                 nextId: nextId
             };
         }
@@ -122,14 +139,14 @@ function updateids() {
     
     var getData = function(cell) {
         var content = cell.element.textContent;
-        // Get or assign ID based on text content
-        var id = LineIdStore.getId(content);
+        // Get or assign ID based on the cell element (ID travels with element)
+        var id = LineIdStore.getIdForElement(cell.element, cell.row, content);
         return {row: cell.row, id: id, cont: content};
     }
     var cells = lines.cells.map(getData)
     var cache = lines.cellCache.map(function(c) {
         var content = c.element.textContent;
-        var id = LineIdStore.getId(content);
+        var id = LineIdStore.getIdForElement(c.element, c.row, content);
         return {row: c.row, id: id, cont: content};
     })
 
