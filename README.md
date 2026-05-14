@@ -20,7 +20,7 @@ aa: '<a href="" target="_blank">',
 
 ### добавить в массив ace_line id строки
 ace_line
-16275
+
 $renderLinesFragment
 this.$lines
 e.prototype.updateLines = function (e, t, n)
