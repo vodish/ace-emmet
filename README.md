@@ -23,7 +23,7 @@ ace_line
 16275
 $renderLinesFragment
 this.$lines
-
+e.prototype.updateLines = function (e, t, n)
 
 this.cells — массив объектов ячеек (cell), каждый элемент имеет следующие свойства:
     

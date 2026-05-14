@@ -71,6 +71,7 @@
 var editor = ace.edit("edt");
 editor.session.setOption("useWorker", false);
 editor.session.setMode("ace/mode/html");
+editor.setValue('one\ntwo\n');
 
 function updateids() {
     // источник
@@ -91,13 +92,14 @@ function updateids() {
 
 }
 
-editor.setValue('one\ntwo\n');
-
 // обновлять при изменении
 // editor.on('change', updateids);
 // обновить после рендера
 editor.renderer.on("afterRender", updateids);
 
+
+
+// отладочная байда аяя
 function moveLineDown() {
     editor.execCommand('movelinedown');
 }
