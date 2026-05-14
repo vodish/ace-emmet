@@ -48,7 +48,7 @@
 var editor = ace.edit("edt");
 editor.session.setOption("useWorker", false);
 editor.session.setMode("ace/mode/html");
-editor.setValue('id линии\nid линии\nid линии\nid линии\n');
+editor.setValue('id линии\nid линии\n');
 
 function updateRaw() {
     var raw = document.getElementById('raw');
@@ -65,8 +65,10 @@ function updateRaw() {
     }
     raw.innerHTML = html;
 }
+
 // обновлять при изменении
 editor.on('change', updateRaw);
+updateRaw()
 </script>
 </body>
 </html>
