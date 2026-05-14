@@ -16213,8 +16213,13 @@
                   (a = this.session.getNextFoldLine(u, a)),
                   (l = a ? a.start.row : Infinity));
                 if (u > i) break;
-                var c = s[o++];
+                var c = s[o];
                 if (c) {
+                  var cell = this.$lines.cells[o];
+                  if (cell) {
+                      cell.id = this.$lines.nextCellId++;
+                      cell.row = u;
+                  }
                   (this.dom.removeChildren(c),
                     this.$renderLine(c, u, u == l ? a : !1),
                     f &&
@@ -16223,6 +16228,7 @@
                   var h = e.lineHeight * this.session.getRowLength(u) + "px";
                   c.style.height != h && ((f = !0), (c.style.height = h));
                 }
+                o++;
                 u++;
               }
               if (f)

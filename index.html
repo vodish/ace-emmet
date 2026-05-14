@@ -30,9 +30,20 @@
         font-size: 8px;
         gap: 2rem;
     }
+    .controls {
+        margin: 10px;
+        padding: 10px;
+        border: 1px solid #ccc;
+    }
 </style>
 </head>
 <body>
+
+<div class="controls">
+    <button onclick="moveLineDown()">Move line down (Alt+Down)</button>
+    <button onclick="moveLineUp()">Move line up (Alt+Up)</button>
+    <button onclick="logCells()">Log cells</button>
+</div>
 
 <div class="flex">
     <div id="edt"></div>
@@ -50,7 +61,6 @@
     </div>
 </div>
 
-
     
 <script src="i/ace/ace.js"></script>
 <script src="i/ace/mode-html.js"></script>
@@ -65,7 +75,7 @@ editor.session.setMode("ace/mode/html");
 function updateids() {
     // источник
     var lines = editor.renderer.$textLayer.$lines;
-    console.log(lines.cells);
+    console.log('cells:', lines.cells);
     
     var getData     = ({row, id, element}) => ({row, id, cont: element.textContent})
     var cells       = lines.cells.map(getData)
@@ -75,7 +85,7 @@ function updateids() {
     var _ids                = document.getElementById('ids')
     var _cells              = document.getElementById('cells')
     var _cellCache          = document.getElementById('cellCache')
-    _ids.innerHTML          = cells.map(c => `<div>[${c.id}]</div>`).join('');
+    _ids.innerHTML          = cells.map(c => `<div>id=${c.id} row=${c.row} "${c.cont}"</div>`).join('');
     _cells.innerHTML        = JSON.stringify(cells, null, 2)
     _cellCache.innerHTML    = JSON.stringify(cache, null, 2)
 
@@ -88,6 +98,20 @@ editor.setValue('one\ntwo\n');
 // обновить после рендера
 editor.renderer.on("afterRender", updateids);
 
+function moveLineDown() {
+    editor.execCommand('movelinedown');
+}
+function moveLineUp() {
+    editor.execCommand('movelineup');
+}
+function logCells() {
+    var lines = editor.renderer.$textLayer.$lines;
+    console.log('Cells:', lines.cells.map(c => ({id: c.id, row: c.row, text: c.element.textContent})));
+    console.log('Cell cache:', lines.cellCache.map(c => ({id: c.id, row: c.row})));
+}
+
+// initial update
+// updateids();
 </script>
 </body>
 </html>
