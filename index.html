@@ -51,8 +51,8 @@
         <pre id="cells"></pre>
     </div>
     <div>
-        <div>cellCache</div>
-        <pre id="cellCache"></pre>
+        <div>cache</div>
+        <pre id="cache"></pre>
     </div>
 </div>
 
@@ -63,113 +63,57 @@
 <script src="i/ace/emmet-cut.js?13"></script>
 <script src="i/ace/ext-emmet.js?13"></script>
 <script>
-// ============================================
-// ID Store - tracks unique IDs for text lines
-// ID is bound to the cell element and follows it when moved
-// ============================================
-var LineIdStore = (function() {
-    // WeakMap: cell.element -> id (ID travels with the DOM element)
-    var elementToId = new WeakMap();
-    // Map: id -> { text, lastRow } (track what text each ID represents)
-    var idToInfo = Object.create(null);
-    // Counter for generating new unique IDs
-    var nextId = 0;
-    
-    return {
-        // Get or create ID for a cell element
-        getIdForElement: function(element, row, text) {
-            // Check if this element already has an ID
-            if (elementToId.has(element)) {
-                var existingId = elementToId.get(element);
-                // Update the info with current row and text
-                idToInfo[existingId].text = text;
-                idToInfo[existingId].lastRow = row;
-                return existingId;
-            }
-            
-            // New element - assign new unique ID
-            var newId = nextId++;
-            elementToId.set(element, newId);
-            idToInfo[newId] = { text: text, lastRow: row, element: element };
-            return newId;
-        },
-        
-        // Get ID by row (helper for display)
-        getIdByRow: function(row) {
-            // Find ID that has this lastRow
-            for (var id in idToInfo) {
-                if (idToInfo[id].lastRow === row) {
-                    return parseInt(id);
-                }
-            }
-            return undefined;
-        },
-        
-        // Get info by ID
-        getInfoById: function(id) {
-            return idToInfo[id];
-        },
-        
-        // Reset store (for debugging)
-        reset: function() {
-            elementToId = new WeakMap();
-            idToInfo = Object.create(null);
-            nextId = 0;
-        },
-        
-        // Get current state for debugging
-        getState: function() {
-            return {
-                idToInfo: idToInfo,
-                nextId: nextId
-            };
-        }
-    };
-})();
 
 var editor = ace.edit("edt");
 editor.session.setOption("useWorker", false);
 editor.session.setMode("ace/mode/html");
 editor.setValue('one\ntwo\n');
 
+function prev(el, dx) {
+  if (('prev' in el)) return
+  el.prev = dx
+}
+
+
 function updateids() {
     // источник
-    var lines = editor.renderer.$textLayer.$lines;
-    console.log('cells:', lines.cells);
-    
-    var getData = function(cell) {
-        var content = cell.element.textContent;
-        // Get or assign ID based on the cell element (ID travels with element)
-        var id = LineIdStore.getIdForElement(cell.element, cell.row, content);
-        return {row: cell.row, id: id, cont: content};
-    }
-    var cells = lines.cells.map(getData)
-    var cache = lines.cellCache.map(function(c) {
-        var content = c.element.textContent;
-        var id = LineIdStore.getIdForElement(c.element, c.row, content);
-        return {row: c.row, id: id, cont: content};
-    })
+    // console.log(editor.renderer.$textLayer.$lines);    
+    var cells = editor.renderer.$textLayer.$lines.cells;
+    var cache = editor.renderer.$textLayer.$lines.cellCache;
 
-    // отображение
-    var _ids                = document.getElementById('ids')
-    var _cells              = document.getElementById('cells')
-    var _cellCache          = document.getElementById('cellCache')
-    _ids.innerHTML          = cells.map(function(c) { 
-        return '<div>id=' + c.id + ' row=' + c.row + ' "' + c.cont + '"</div>';
-    }).join('');
-    _cells.innerHTML        = JSON.stringify(cells, null, 2)
-    _cellCache.innerHTML    = JSON.stringify(cache, null, 2)
+    // добавить nid
+    cells.map((c, dx) => prev(c.element, dx))
+    cache.map((c, dx) => prev(c.element, dx))
+    
+
+    document.getElementById('ids').innerHTML = cells.map((c) => `<div>row=${c.row} cont="${c.element.textContent}" prev=${c.element.prev}</div>`).join('');
+
+
+    // вывод
+    const jsonMap = (c, idx) => ({idx, cont: c.element.textContent, prev: c.element.prev});
+    //
+    document.getElementById('cells').innerHTML = JSON.stringify(cells.map(jsonMap), null, 2)
+    document.getElementById('cache').innerHTML = JSON.stringify(cache.map(jsonMap), null, 2)
+
+    // var _cells              = document.getElementById('cells')
+    // var _cellCache          = document.getElementById('cellCache')
+    // _ids.innerHTML          = lines.cells.map(function(c) { 
+    //     return '<div>row=' + c.row + ' "' 
+    //         + c.element.textContent + '" nid=' + c.element.nid + '</div>';
+    // }).join('');
+    // _cells.innerHTML        = JSON.stringify(cells, null, 2)
+    // _cellCache.innerHTML    = JSON.stringify(cache, null, 2)
 
 }
 
 // обновлять при изменении
-editor.on('change', updateids);
+// editor.on('change', updateids);
 // обновить после рендера
 editor.renderer.on("afterRender", updateids);
 
 
 // initial update
-updateids();
+// updateids();
 </script>
 </body>
 </html>
