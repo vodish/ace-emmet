@@ -15348,7 +15348,9 @@
               (this.$annotations = []),
               (this.$updateAnnotations = this.$updateAnnotations.bind(this)),
               (this.$lines = new u(this.element)),
-              (this.$lines.$offsetCoefficient = 1));
+              (this.$lines.$offsetCoefficient = 1),
+              (this.$lines.contentToId = new Map()),
+              (this.$lines.nextCellId = 10));
           }
           return (
             (e.prototype.setSession = function (e) {
