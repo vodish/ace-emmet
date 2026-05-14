@@ -43,6 +43,7 @@
     <button onclick="moveLineDown()">Move line down (Alt+Down)</button>
     <button onclick="moveLineUp()">Move line up (Alt+Up)</button>
     <button onclick="logCells()">Log cells</button>
+    <button onclick="addEmptyLine()">Add empty line</button>
 </div>
 
 <div class="flex">
@@ -116,6 +117,12 @@ function logCells() {
     var lines = editor.renderer.$textLayer.$lines;
     console.log('Cells:', lines.cells.map(c => ({id: c.id, row: c.row, text: c.element.textContent})));
     console.log('Cell cache:', lines.cellCache.map(c => ({id: c.id, row: c.row})));
+    console.log('contentToId map size:', lines.contentToId?.size);
+    console.log('nextCellId:', lines.nextCellId);
+}
+
+function addEmptyLine() {
+    editor.insert('\n');
 }
 
 // initial update

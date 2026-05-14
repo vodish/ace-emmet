@@ -17785,12 +17785,16 @@
             (this.content.className = "ace_content"),
             this.scroller.appendChild(this.content),
             (this.$gutterLayer = new u(this.$gutter)),
+            (this.$gutterLayer.$lines.contentToId = new Map()),
+            (this.$gutterLayer.$lines.nextCellId = 10),
             this.$gutterLayer.on(
               "changeGutterWidth",
               this.onGutterResize.bind(this),
             ),
             (this.$markerBack = new a(this.content)));
           var r = (this.$textLayer = new f(this.content));
+          (this.$textLayer.$lines.contentToId = new Map()),
+            (this.$textLayer.$lines.nextCellId = 10);
           ((this.canvas = r.element),
             (this.$markerFront = new a(this.content)),
             (this.$cursorLayer = new l(this.content)),
