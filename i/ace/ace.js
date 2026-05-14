@@ -15297,7 +15297,7 @@
                 var o = r.createElement("div");
                 (i && i(o),
                   this.element.appendChild(o),
-                  (s = { element: o, text: "", row: e, id: this.nextCellId++ }));
+                  (s = { element: o, text: "", row: e, id: null }));
               }
               return ((s.row = e), s);
             }),
@@ -15694,6 +15694,7 @@
                   this.$lines.computeLineTop(i, t, o) + "px",
                 ),
                 (e.text = E),
+                (e.id = this.$lines.getContentId(E)),
                 l.style.display === "none" && f.style.display === "none"
                   ? e.element.setAttribute("aria-hidden", !0)
                   : e.element.setAttribute("aria-hidden", !1),
