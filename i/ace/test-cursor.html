@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Test Cursor Navigation</title>
+    <style>
+        #editor { 
+            position: absolute;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: 0;
+            font-size: 16px;
+        }
+        #info {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            background: rgba(255,255,255,0.9);
+            padding: 10px;
+            border: 1px solid #ccc;
+            z-index: 1000;
+        }
+    </style>
+</head>
+<body>
+    <div id="info">
+        <div>Position: <span id="pos">0:0</span></div>
+        <div>Line content (char codes): <span id="codes"></span></div>
+        <div>Instructions: Use arrow keys to navigate. Zero-width chars: &#8203; &#8204;</div>
+    </div>
+    <div id="editor"></div>
+    <script src="ace.js"></script>
+    <script>
+        ace.require("ace/ext/language_tools");
+        var editor = ace.edit("editor", {
+            maxLines: 30,
+            theme: "ace/theme/tomorrow_night",
+            enableBasicAutocompletion: true,
+            enableLiveAutocompletion: true
+        });
+        
+        // Test text with zero-width characters
+        var zwsp = '\u200B'; // ZERO WIDTH SPACE
+        var zwnj = '\u200C'; // ZERO WIDTH NON-JOINER
+        
+        var testText = 
+            "Normal text" + "\n" +
+            "A" + zwsp + "B" + zwnj + "C" + "\n" +
+            zwsp + "Start with ZWSP" + "\n" +
+            "End with ZWNJ" + zwnj + "\n" +
+            zwsp + zwnj + "Multiple at start" + "\n" +
+            "Between" + zwsp + zwnj + "words" + "\n";
+        
+        editor.setValue(testText, -1);
+        editor.clearSelection();
+        editor.moveCursorTo(1, 0);
+        
+        function updateInfo() {
+            var pos = editor.getCursorPosition();
+            document.getElementById('pos').textContent = pos.row + ':' + pos.column;
+            
+            var line = editor.session.getLine(pos.row);
+            var codes = [];
+            for (var i = 0; i < line.length; i++) {
+                var code = line.charCodeAt(i);
+                if (code === 8203) codes.push('\\u200B');
+                else if (code === 8204) codes.push('\\u200C');
+                else codes.push(line[i]);
+            }
+            document.getElementById('codes').textContent = codes.join('');
+        }
+        
+        editor.selection.on('changeCursor', updateInfo);
+        updateInfo();
+        
+        console.log('Test loaded. Current line char codes:', document.getElementById('codes').textContent);
+    </script>
+</body>
+</html>
