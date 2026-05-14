@@ -73,14 +73,18 @@ function updateids() {
     document.getElementById('cells').innerHTML = JSON.stringify(cells.map(jsonMap), null, 2)
     document.getElementById('cache').innerHTML = JSON.stringify(cache.map(jsonMap), null, 2)
 
-    // var _cells              = document.getElementById('cells')
-    // var _cellCache          = document.getElementById('cellCache')
-    // _ids.innerHTML          = lines.cells.map(function(c) { 
-    //     return '<div>row=' + c.row + ' "' 
-    //         + c.element.textContent + '" nid=' + c.element.nid + '</div>';
-    // }).join('');
-    // _cells.innerHTML        = JSON.stringify(cells, null, 2)
-    // _cellCache.innerHTML    = JSON.stringify(cache, null, 2)
+    lines.forEach(function(line, index) {
+    // Заменяем невидимые символы на их кодовые обозначения
+    var replaced = line
+        .replace(/\u200B/g, '[U+200B]') // Zero Width Space
+        .replace(/\u200C/g, '[U+200C]') // Zero Width Non‑Joiner
+        ;
+    
+    var lineDiv = document.createElement('div');
+    lineDiv.textContent = replaced;
+    lineDiv.setAttribute('data-line', index + 1);
+    rawDiv.appendChild(lineDiv);
+});
 
 }
 
