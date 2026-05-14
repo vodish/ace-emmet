@@ -9964,9 +9964,11 @@
                 ((r = e.charCodeAt(i)),
                   r == 9
                     ? (n += this.getScreenTabSize(n))
-                    : r >= 4352 && x(r)
-                      ? (n += 2)
-                        : (n += 1));
+                    : r === 8203 || r === 8204
+                      ? (n += 0)
+                      : r >= 4352 && x(r)
+                        ? (n += 2)
+                          : (n += 1));
                 if (n > t) break;
               }
               return [n, i];
