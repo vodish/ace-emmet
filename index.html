@@ -73,14 +73,36 @@ editor.session.setOption("useWorker", false);
 editor.session.setMode("ace/mode/html");
 editor.setValue('one\ntwo\n');
 
+// Карта для хранения постоянных id привязанных к содержимому строки
+var contentToId = new Map();
+var nextId = 1;
+
+// Функция для получения или создания постоянного id для содержимого
+function getPersistentId(content) {
+    // Пустое содержимое тоже должно иметь уникальный id
+    var key = content;
+    if (!contentToId.has(key)) {
+        contentToId.set(key, nextId++);
+    }
+    return contentToId.get(key);
+}
+
 function updateids() {
     // источник
     var lines = editor.renderer.$textLayer.$lines;
     console.log('cells:', lines.cells);
     
-    var getData     = ({row, id, element}) => ({row, id, cont: element.textContent})
+    var getData     = ({row, element}) => {
+        var content = element.textContent;
+        var id = getPersistentId(content);
+        return {row, id, cont: content};
+    }
     var cells       = lines.cells.map(getData)
-    var cache       = lines.cellCache.map(getData)
+    var cache       = lines.cellCache.map(({row, element}) => {
+        var content = element.textContent;
+        var id = getPersistentId(content);
+        return {row, id, cont: content};
+    })
 
     // отображение
     var _ids                = document.getElementById('ids')
