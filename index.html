@@ -63,19 +63,72 @@
 <script src="i/ace/emmet-cut.js?13"></script>
 <script src="i/ace/ext-emmet.js?13"></script>
 <script>
+// Стор для управления уникальными ID строк
+var LineIdStore = (function() {
+    function LineIdStore() {
+        this.textToId = new Map();      // текст -> id
+        this.idToText = new Map();      // id -> текст
+        this.rowToId = new Map();       // row -> id
+        this.nextId = 0;                // следующий доступный ID
+    }
+    
+    // Получить или создать ID для текста
+    LineIdStore.prototype.getIdForText = function(text) {
+        if (this.textToId.has(text)) {
+            return this.textToId.get(text);
+        }
+        var newId = this.nextId++;
+        this.textToId.set(text, newId);
+        this.idToText.set(newId, text);
+        return newId;
+    };
+    
+    // Обновить привязку row -> id
+    LineIdStore.prototype.updateRowMapping = function(row, text) {
+        var id = this.getIdForText(text);
+        this.rowToId.set(row, id);
+        return id;
+    };
+    
+    // Получить ID для row
+    LineIdStore.prototype.getIdForRow = function(row) {
+        return this.rowToId.get(row);
+    };
+    
+    // Очистить маппинг row (при удалении строк)
+    LineIdStore.prototype.clearRowMapping = function(row) {
+        this.rowToId.delete(row);
+    };
+    
+    // Сбросить все данные
+    LineIdStore.prototype.reset = function() {
+        this.textToId.clear();
+        this.idToText.clear();
+        this.rowToId.clear();
+        this.nextId = 0;
+    };
+    
+    return LineIdStore;
+})();
+
 var editor = ace.edit("edt");
 editor.session.setOption("useWorker", false);
 editor.session.setMode("ace/mode/html");
 editor.setValue('one\ntwo\n');
+
+// Инициализируем стор
+var lineIdStore = new LineIdStore();
 
 function updateids() {
     // источник
     var lines = editor.renderer.$textLayer.$lines;
     console.log('cells:', lines.cells);
     
-    var getData     = ({row, element, id}) => {
+    var getData = ({row, element, id}) => {
         var content = element.textContent;
-        return {row, id, cont: content};
+        // Получаем или регистрируем ID для этого текста
+        var storedId = lineIdStore.updateRowMapping(row, content);
+        return {row, id: storedId, cont: content};
     }
     var cells       = lines.cells.map(getData)
     var cache       = lines.cellCache.map(({row, element, id}) => {
@@ -94,7 +147,7 @@ function updateids() {
 }
 
 // обновлять при изменении
-// editor.on('change', updateids);
+editor.on('change', updateids);
 // обновить после рендера
 editor.renderer.on("afterRender", updateids);
 
