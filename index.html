@@ -15,6 +15,31 @@
     .flex #raw {
         width: 50%;
         border: solid 1px red;
+        overflow: auto;
+        font-family: monospace;
+        white-space: pre;
+        background: #f9f9f9;
+    }
+    #raw div {
+        border-bottom: 1px dotted #ccc;
+        padding: 2px 4px;
+        position: relative;
+    }
+    /* #raw div::before {
+        content: attr(data-line);
+        display: inline-block;
+        width: 3em;
+        color: #999;
+        text-align: right;
+        padding-right: 1em;
+        user-select: none;
+
+        ace_invisible ace_invisible_space ace_invalid
+    } */
+    
+    /* Скрытие невидимых символов при включенном zero-less */
+    .zero-less .ace_invisible {
+        display: none !important;
     }
 </style>
 </head>
@@ -35,6 +60,34 @@
     editor.session.setOption("useWorker", false);
     editor.session.setMode("ace/mode/html");
     
+    function updateRawDisplay() {
+        var content = editor.getValue();
+        var lines = content.split('\n');
+        var rawDiv = document.getElementById('raw');
+        rawDiv.innerHTML = '';
+        
+        lines.forEach(function(line, index) {
+            // Заменяем невидимые символы на их кодовые обозначения
+            var replaced = line
+                .replace(/\u200B/g, '[U+200B]') // Zero Width Space
+                .replace(/\u200C/g, '[U+200C]') // Zero Width Non‑Joiner
+                ;
+            
+            var lineDiv = document.createElement('div');
+            lineDiv.textContent = replaced;
+            lineDiv.setAttribute('data-line', index + 1);
+            rawDiv.appendChild(lineDiv);
+        });
+    }
+    
+    // Устанавливаем демонстрационное содержимое с невидимыми символами
+    editor.setValue('Zero Width Space\u200B\nZero Width Non‑Joiner\u200C');
+    
+    // Инициализируем отображение
+    updateRawDisplay();
+    
+    // Слушаем изменения в редакторе
+    editor.session.on('change', updateRawDisplay);
 </script>
 </body>
 </html>
