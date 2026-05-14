@@ -1,43 +1,61 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>ACE in Action</title>
+<title>ACE Content Map</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <style type="text/css" media="screen">
     .flex {
-      height: 90vh;
+      height: 30vh;
       margin-top: 1em;
       display: flex;
     }
     .flex #edt {
         width: 50%;
     }
-    .flex #raw {
+    .flex #ids {
         width: 50%;
         border: solid 1px red;
         overflow: auto;
         font-family: monospace;
-        white-space: pre;
-        background: #f9f9f9;
+        font-size: 10px;
     }
-    #raw div {
+    #ids div {
         border-bottom: 1px dotted #ccc;
         padding: 2px 4px;
         position: relative;
     }
     
-    
-    /* .ace_invisible {
-        display: none !important;
-    } */
+    .debug {
+        font-family: monospace;
+        font-size: 8px;
+        gap: 2rem;
+    }
+    .controls {
+        margin: 10px;
+        padding: 10px;
+        border: 1px solid #ccc;
+    }
 </style>
 </head>
 <body>
 
+
 <div class="flex">
     <div id="edt"></div>
-    <div id="raw"></div>
+    <div id="ids"></div>
 </div>
+
+<div class="flex debug">
+    <div>
+        <div>cells</div>
+        <pre id="cells"></pre>
+    </div>
+    <div>
+        <div>cellCache</div>
+        <pre id="cellCache"></pre>
+    </div>
+</div>
+
     
 <script src="i/ace/ace.js"></script>
 <script src="i/ace/mode-html.js"></script>
@@ -45,38 +63,44 @@
 <script src="i/ace/emmet-cut.js?13"></script>
 <script src="i/ace/ext-emmet.js?13"></script>
 <script>
-    var editor = ace.edit("edt");
-    editor.session.setOption("useWorker", false);
-    editor.session.setMode("ace/mode/html");
+var editor = ace.edit("edt");
+editor.session.setOption("useWorker", false);
+editor.session.setMode("ace/mode/html");
+editor.setValue('one\ntwo\n');
+
+function updateids() {
+    // источник
+    var lines = editor.renderer.$textLayer.$lines;
+    console.log('cells:', lines.cells);
     
-    function updateRawDisplay() {
-        var content = editor.getValue();
-        var lines = content.split('\n');
-        var rawDiv = document.getElementById('raw');
-        rawDiv.innerHTML = '';
-        
-        lines.forEach(function(line, index) {
-            // Заменяем невидимые символы на их кодовые обозначения
-            var replaced = line
-                .replace(/\u200B/g, '[U+200B]') // Zero Width Space
-                .replace(/\u200C/g, '[U+200C]') // Zero Width Non‑Joiner
-                ;
-            
-            var lineDiv = document.createElement('div');
-            lineDiv.textContent = replaced;
-            lineDiv.setAttribute('data-line', index + 1);
-            rawDiv.appendChild(lineDiv);
-        });
+    var getData     = ({row, element, id}) => {
+        var content = element.textContent;
+        return {row, id, cont: content};
     }
-    
-    // Устанавливаем демонстрационное содержимое с невидимыми символами
-    editor.setValue('Zero Width Space\u200B\nZero Width Non‑Joiner\u200C');
-    
-    // Инициализируем отображение
-    updateRawDisplay();
-    
-    // Слушаем изменения в редакторе
-    editor.session.on('change', updateRawDisplay);
+    var cells       = lines.cells.map(getData)
+    var cache       = lines.cellCache.map(({row, element, id}) => {
+        var content = element.textContent;
+        return {row, id, cont: content};
+    })
+
+    // отображение
+    var _ids                = document.getElementById('ids')
+    var _cells              = document.getElementById('cells')
+    var _cellCache          = document.getElementById('cellCache')
+    _ids.innerHTML          = cells.map(c => `<div>id=${c.id} row=${c.row} "${c.cont}"</div>`).join('');
+    _cells.innerHTML        = JSON.stringify(cells, null, 2)
+    _cellCache.innerHTML    = JSON.stringify(cache, null, 2)
+
+}
+
+// обновлять при изменении
+// editor.on('change', updateids);
+// обновить после рендера
+editor.renderer.on("afterRender", updateids);
+
+
+// initial update
+// updateids();
 </script>
 </body>
 </html>
