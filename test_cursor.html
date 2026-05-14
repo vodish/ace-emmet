@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Ace Editor - Zero Width Characters Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        #editor { 
+            width: 800px; 
+            height: 400px; 
+            border: 1px solid #ccc;
+            font-size: 16px;
+        }
+        .info {
+            margin-top: 20px;
+            padding: 10px;
+            background: #f0f0f0;
+            border-radius: 5px;
+        }
+        button {
+            margin: 5px;
+            padding: 10px 15px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <h1>Ace Editor - Тест невидимых символов (\u200B и \u200C)</h1>
+    
+    <div>
+        <button onclick="insertZeroWidthSpace()">Вставить U+200B (ZWSP)</button>
+        <button onclick="insertZeroWidthNonJoiner()">Вставить U+200C (ZWNJ)</button>
+        <button onclick="getPosition()">Показать позицию курсора</button>
+        <button onclick="clearEditor()">Очистить</button>
+    </div>
+    
+    <div id="editor"></div>
+    
+    <div class="info">
+        <h3>Инструкция:</h3>
+        <ol>
+            <li>Нажмите кнопки для вставки невидимых символов в текст</li>
+            <li>Попробуйте перемещать курсор стрелками влево/вправо</li>
+            <li>Курсор должен "перескакивать" через невидимые символы</li>
+            <li>Нажмите "Показать позицию курсора" чтобы увидеть текущую позицию</li>
+        </ol>
+        <p><strong>Текст для теста:</strong> Введите: A\u200B\u200CB\u200BC и попробуйте перемещать курсор</p>
+    </div>
+
+    <script src="i/ace/ace.js"></script>
+    <script>
+        var editor = ace.edit("editor", {
+            maxLines: 30,
+            theme: "ace/theme/chrome"
+        });
+        
+        editor.setValue("Пример текста с невидимыми символами:\nA\u200B\u200CB\u200CC\nПопробуйте перемещать курсор стрелками!", -1);
+        
+        function insertZeroWidthSpace() {
+            editor.insert('\u200B');
+        }
+        
+        function insertZeroWidthNonJoiner() {
+            editor.insert('\u200C');
+        }
+        
+        function getPosition() {
+            var pos = editor.getCursorPosition();
+            var line = editor.session.getLine(pos.row);
+            alert('Позиция курсора:\nСтрока: ' + pos.row + '\nКолонка: ' + pos.column + 
+                  '\nСимвол перед курсором: ' + (pos.column > 0 ? line.charCodeAt(pos.column - 1).toString(16) : 'нет') +
+                  '\nСимвол после курсора: ' + (pos.column < line.length ? line.charCodeAt(pos.column).toString(16) : 'нет'));
+        }
+        
+        function clearEditor() {
+            editor.setValue("");
+        }
+        
+        // Отслеживаем движение курсора
+        editor.selection.on('changeCursor', function() {
+            var pos = editor.getCursorPosition();
+            console.log('Cursor moved to:', pos);
+        });
+    </script>
+</body>
+</html>

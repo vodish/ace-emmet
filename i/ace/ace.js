@@ -5324,6 +5324,13 @@
                 ? this.moveCursorBy(0, -n)
                 : this.moveCursorBy(0, -1);
             }
+            var r = this.lead.getPosition();
+            while (r.column > 0) {
+              var i = this.doc.getLine(r.row).charCodeAt(r.column - 1);
+              if (i !== 8203 && i !== 8204) break;
+              this.moveCursorBy(0, -1);
+              r = this.lead.getPosition();
+            }
           }),
           (this.moveCursorRight = function () {
             var e = this.lead.getPosition(),
@@ -5340,6 +5347,15 @@
               !this.session.getNavigateWithinSoftTabs()
                 ? this.moveCursorBy(0, n)
                 : this.moveCursorBy(0, 1);
+            }
+            var r = this.lead.getPosition();
+            var s = this.doc.getLine(r.row);
+            while (r.column < s.length) {
+              var o = s.charCodeAt(r.column);
+              if (o !== 8203 && o !== 8204) break;
+              this.moveCursorBy(0, 1);
+              r = this.lead.getPosition();
+              s = this.doc.getLine(r.row);
             }
           }),
           (this.moveCursorLineStart = function () {
@@ -5441,17 +5457,17 @@
             if (this.session.tokenRe.exec(e))
               t = this.session.tokenRe.lastIndex;
             else {
-              while ((n = e[t]) && r.test(n)) t++;
+              while ((n = e[t]) && (r.test(n) || n.charCodeAt(0) === 8203 || n.charCodeAt(0) === 8204)) t++;
               if (t < 1) {
                 i.lastIndex = 0;
                 while ((n = e[t]) && !i.test(n)) {
                   ((i.lastIndex = 0), t++);
-                  if (r.test(n)) {
+                  if (r.test(n) || n.charCodeAt(0) === 8203 || n.charCodeAt(0) === 8204) {
                     if (t > 2) {
                       t--;
                       break;
                     }
-                    while ((n = e[t]) && r.test(n)) t++;
+                    while ((n = e[t]) && (r.test(n) || n.charCodeAt(0) === 8203 || n.charCodeAt(0) === 8204)) t++;
                     if (t > 2) break;
                   }
                 }
@@ -5547,6 +5563,8 @@
             (r && ((e = r.start.row), (t = r.start.column)),
               (this.$keepDesiredColumnOnChange = !0));
             var i = this.session.getLine(e);
+            while (t < i.length && (i.charCodeAt(t) === 8203 || i.charCodeAt(t) === 8204)) t++;
+            while (t > 0 && (i.charCodeAt(t - 1) === 8203 || i.charCodeAt(t - 1) === 8204)) t--;
             (/[\uDC00-\uDFFF]/.test(i.charAt(t)) &&
               i.charAt(t - 1) &&
               (this.lead.row == e && this.lead.column == t + 1
@@ -6572,9 +6590,9 @@
         };
       ((function () {
         ((this.$defaultBehaviour = new o()),
-          (this.tokenRe = new RegExp("^[" + u.wordChars + "\\$_]+", "g")),
+          (this.tokenRe = new RegExp("^[^\\s\\u200B\\u200C]+$", "g")),
           (this.nonTokenRe = new RegExp(
-            "^(?:[^" + u.wordChars + "\\$_]|\\s])+",
+            "^(?:[\\s\\u200B\\u200C]|[^" + u.wordChars + "\\$_])+",
             "g",
           )),
           (this.getTokenizer = function () {
