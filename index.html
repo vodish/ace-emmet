@@ -17,7 +17,9 @@
     .debug {
         font-family: monospace;
     }
-    
+    /* .ace_editor .ace_invisible {
+        opacity: 0;
+    } */
 </style>
 </head>
 <body>
@@ -48,7 +50,14 @@ var editor = ace.edit("edt");
 editor.setOption("fontSize", "16px");
 editor.session.setOption("useWorker", false);
 editor.session.setMode("ace/mode/html");
-editor.setValue('one\ntwo\n');
+editor.setOption("showInvisibles", false);
+// или альтернативный метод
+editor.setShowInvisibles(false);
+
+// Устанавливаем очищенный текст обратно
+// editor.setValue(cleanedValue, -1); // -1 сохраняет позицию курсора
+
+editor.setValue('one\u200B\ntwo\u200C');
 
 function prev(el, dx) {
   if (('prev' in el)) return
@@ -67,24 +76,16 @@ function updateids() {
     cache.map((c, dx) => prev(c.element, dx))
     
 
-    // вывод
+    // отладка
     const jsonMap = (c, idx) => ({idx, cont: c.element.textContent, prev: c.element.prev});
-    //
     document.getElementById('cells').innerHTML = JSON.stringify(cells.map(jsonMap), null, 2)
     document.getElementById('cache').innerHTML = JSON.stringify(cache.map(jsonMap), null, 2)
 
-    lines.forEach(function(line, index) {
-    // Заменяем невидимые символы на их кодовые обозначения
-    var replaced = line
-        .replace(/\u200B/g, '[U+200B]') // Zero Width Space
-        .replace(/\u200C/g, '[U+200C]') // Zero Width Non‑Joiner
-        ;
     
-    var lineDiv = document.createElement('div');
-    lineDiv.textContent = replaced;
-    lineDiv.setAttribute('data-line', index + 1);
-    rawDiv.appendChild(lineDiv);
-});
+    // Заменяем невидимые символы на их кодовые обозначения
+    // var replaced = line
+    //     .replace(/\u200B/g, '[U+200B]') // Zero Width Space
+    //     .replace(/\u200C/g, '[U+200C]') // Zero Width Non‑Joiner
 
 }
 
