@@ -66,45 +66,75 @@
 // Стор для управления уникальными ID строк
 var LineIdStore = (function() {
     function LineIdStore() {
-        this.textToId = new Map();      // текст -> id
-        this.idToText = new Map();      // id -> текст
-        this.rowToId = new Map();       // row -> id
+        this.rowToId = new Map();       // row -> id (основной маппинг: ID следует за позицией row)
+        this.idToText = new Map();      // id -> текущий текст
         this.nextId = 0;                // следующий доступный ID
     }
     
-    // Получить или создать ID для текста
-    LineIdStore.prototype.getIdForText = function(text) {
-        if (this.textToId.has(text)) {
-            return this.textToId.get(text);
+    // Получить или создать ID для строки с данным row
+    LineIdStore.prototype.getIdForRow = function(row, text) {
+        // Если для этого row уже есть ID, возвращаем его (текст может измениться, ID остаётся)
+        if (this.rowToId.has(row)) {
+            var existingId = this.rowToId.get(row);
+            // Обновляем текст для этого ID
+            this.idToText.set(existingId, text);
+            return existingId;
         }
+        // Новый row - создаём новый ID
         var newId = this.nextId++;
-        this.textToId.set(text, newId);
+        this.rowToId.set(row, newId);
         this.idToText.set(newId, text);
         return newId;
     };
     
-    // Обновить привязку row -> id
-    LineIdStore.prototype.updateRowMapping = function(row, text) {
-        var id = this.getIdForText(text);
-        this.rowToId.set(row, id);
-        return id;
-    };
-    
     // Получить ID для row
-    LineIdStore.prototype.getIdForRow = function(row) {
+    LineIdStore.prototype.getIdForRowOnly = function(row) {
         return this.rowToId.get(row);
     };
     
-    // Очистить маппинг row (при удалении строк)
-    LineIdStore.prototype.clearRowMapping = function(row) {
-        this.rowToId.delete(row);
+    // Получить текст для ID
+    LineIdStore.prototype.getTextForId = function(id) {
+        return this.idToText.get(id);
+    };
+    
+    // Обработать перемещение строк (сдвиг row)
+    // Вызывается когда нужно обновить все маппинги после изменений
+    LineIdStore.prototype.syncRows = function(rowsWithData) {
+        // rowsWithData: массив объектов {row, text}
+        var newRowToId = new Map();
+        
+        for (var i = 0; i < rowsWithData.length; i++) {
+            var item = rowsWithData[i];
+            var row = item.row;
+            var text = item.text;
+            
+            // Проверяем, был ли уже ID для этого текста на старом row
+            var foundId = null;
+            this.rowToId.forEach(function(id, oldRow) {
+                if (this.idToText.get(id) === text && foundId === null) {
+                    foundId = id;
+                }
+            }, this);
+            
+            if (foundId !== null) {
+                // Текст найден - сохраняем его ID и привязываем к новому row
+                newRowToId.set(row, foundId);
+                this.idToText.set(foundId, text);
+            } else {
+                // Новый текст - создаём новый ID
+                var newId = this.nextId++;
+                newRowToId.set(row, newId);
+                this.idToText.set(newId, text);
+            }
+        }
+        
+        this.rowToId = newRowToId;
     };
     
     // Сбросить все данные
     LineIdStore.prototype.reset = function() {
-        this.textToId.clear();
-        this.idToText.clear();
         this.rowToId.clear();
+        this.idToText.clear();
         this.nextId = 0;
     };
     
@@ -124,23 +154,35 @@ function updateids() {
     var lines = editor.renderer.$textLayer.$lines;
     console.log('cells:', lines.cells);
     
-    var getData = ({row, element, id}) => {
-        var content = element.textContent;
-        // Получаем или регистрируем ID для этого текста
-        var storedId = lineIdStore.updateRowMapping(row, content);
-        return {row, id: storedId, cont: content};
+    // Собираем данные о всех строках: row и текст
+    var rowsData = lines.cells.map(function(cell) {
+        return {
+            row: cell.row,
+            text: cell.element.textContent
+        };
+    });
+    
+    // Синхронизируем стор с текущим состоянием строк
+    // Это обеспечит перемещение ID вслед за текстом при изменении порядка строк
+    lineIdStore.syncRows(rowsData);
+    
+    var getData = function(cell) {
+        var content = cell.element.textContent;
+        // Получаем ID для этого row (после синхронизации он уже актуален)
+        var storedId = lineIdStore.getIdForRowOnly(cell.row);
+        return {row: cell.row, id: storedId, cont: content};
     }
-    var cells       = lines.cells.map(getData)
-    var cache       = lines.cellCache.map(({row, element, id}) => {
-        var content = element.textContent;
-        return {row, id, cont: content};
+    var cells       = lines.cells.map(getData);
+    var cache       = lines.cellCache.map(function(item) {
+        var content = item.element.textContent;
+        return {row: item.row, id: item.id, cont: content};
     })
 
     // отображение
     var _ids                = document.getElementById('ids')
     var _cells              = document.getElementById('cells')
     var _cellCache          = document.getElementById('cellCache')
-    _ids.innerHTML          = cells.map(c => `<div>id=${c.id} row=${c.row} "${c.cont}"</div>`).join('');
+    _ids.innerHTML          = cells.map(function(c) { return '<div>id=' + c.id + ' row=' + c.row + ' "' + c.cont + '"</div>'; }).join('');
     _cells.innerHTML        = JSON.stringify(cells, null, 2)
     _cellCache.innerHTML    = JSON.stringify(cache, null, 2)
 
@@ -151,9 +193,8 @@ editor.on('change', updateids);
 // обновить после рендера
 editor.renderer.on("afterRender", updateids);
 
-
-// initial update
-// updateids();
+// начальное обновление после первой отрисовки
+setTimeout(updateids, 100);
 </script>
 </body>
 </html>
