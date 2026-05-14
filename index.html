@@ -8,33 +8,16 @@
       height: 30vh;
       margin-top: 1em;
       display: flex;
+      gap: 2em;
     }
     .flex #edt {
         width: 50%;
     }
-    .flex #ids {
-        width: 50%;
-        border: solid 1px red;
-        overflow: auto;
-        font-family: monospace;
-        font-size: 10px;
-    }
-    #ids div {
-        border-bottom: 1px dotted #ccc;
-        padding: 2px 4px;
-        position: relative;
-    }
     
     .debug {
         font-family: monospace;
-        font-size: 8px;
-        gap: 2rem;
     }
-    .controls {
-        margin: 10px;
-        padding: 10px;
-        border: 1px solid #ccc;
-    }
+    
 </style>
 </head>
 <body>
@@ -42,19 +25,16 @@
 
 <div class="flex">
     <div id="edt"></div>
-    <div id="ids"></div>
-</div>
-
-<div class="flex debug">
-    <div>
+    <div class="debug">
         <div>cells</div>
         <pre id="cells"></pre>
     </div>
-    <div>
+    <div class="debug">
         <div>cache</div>
         <pre id="cache"></pre>
     </div>
 </div>
+
 
     
 <script src="i/ace/ace.js"></script>
@@ -65,6 +45,7 @@
 <script>
 
 var editor = ace.edit("edt");
+editor.setOption("fontSize", "16px");
 editor.session.setOption("useWorker", false);
 editor.session.setMode("ace/mode/html");
 editor.setValue('one\ntwo\n');
@@ -85,9 +66,6 @@ function updateids() {
     cells.map((c, dx) => prev(c.element, dx))
     cache.map((c, dx) => prev(c.element, dx))
     
-
-    document.getElementById('ids').innerHTML = cells.map((c) => `<div>row=${c.row} cont="${c.element.textContent}" prev=${c.element.prev}</div>`).join('');
-
 
     // вывод
     const jsonMap = (c, idx) => ({idx, cont: c.element.textContent, prev: c.element.prev});
