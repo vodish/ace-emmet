@@ -45,11 +45,28 @@
 <script src="i/ace/emmet-cut.js?13"></script>
 <script src="i/ace/ext-emmet.js?13"></script>
 <script>
-    var editor = ace.edit("edt");
-    editor.session.setOption("useWorker", false);
-    editor.session.setMode("ace/mode/html");
-    editor.setValue('id линии\nid линии\nid линии\nid линии\n');
-    
+var editor = ace.edit("edt");
+editor.session.setOption("useWorker", false);
+editor.session.setMode("ace/mode/html");
+editor.setValue('id линии\nid линии\nid линии\nid линии\n');
+
+function updateRaw() {
+    var raw = document.getElementById('raw');
+    if (!raw) return;
+    var textLayer = editor.renderer.$textLayer;
+    if (!textLayer) return;
+    var lines = textLayer.$lines;
+    if (!lines || !lines.cells) return;
+    var cells = lines.cells;
+    var html = '';
+    for (var i = 0; i < cells.length; i++) {
+        var cell = cells[i];
+        html += '<div>' + i + ' = ' + (cell.id || '?') + '</div>';
+    }
+    raw.innerHTML = html;
+}
+// обновлять при изменении
+editor.on('change', updateRaw);
 </script>
 </body>
 </html>
