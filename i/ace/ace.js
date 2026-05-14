@@ -15213,9 +15213,16 @@
               (this.cells = []),
               (this.cellCache = []),
               (this.$offsetCoefficient = 0),
-              (this.nextCellId = 10));
+              (this.nextCellId = 10),
+              (this.contentToId = new Map()));
           }
           return (
+            (e.prototype.getContentId = function (e) {
+              if (!this.contentToId.has(e)) {
+                this.contentToId.set(e, this.nextCellId++);
+              }
+              return this.contentToId.get(e);
+            }),
             (e.prototype.moveContainer = function (e) {
               r.translate(
                 this.element,
