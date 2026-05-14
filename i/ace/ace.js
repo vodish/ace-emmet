@@ -15212,7 +15212,8 @@
               (this.element.style.height = this.canvasHeight * 2 + "px"),
               (this.cells = []),
               (this.cellCache = []),
-              (this.$offsetCoefficient = 0));
+              (this.$offsetCoefficient = 0),
+              (this.nextCellId = 1));
           }
           return (
             (e.prototype.moveContainer = function (e) {
@@ -15289,7 +15290,9 @@
                 var o = r.createElement("div");
                 (i && i(o),
                   this.element.appendChild(o),
-                  (s = { element: o, text: "", row: e }));
+                  (s = { element: o, text: "", row: e, id: this.nextCellId++ }));
+              } else if (s.id === undefined) {
+                s.id = this.nextCellId++;
               }
               return ((s.row = e), s);
             }),
