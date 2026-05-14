@@ -63,6 +63,53 @@
 <script src="i/ace/emmet-cut.js?13"></script>
 <script src="i/ace/ext-emmet.js?13"></script>
 <script>
+// ============================================
+// ID Store - tracks unique IDs for text lines
+// ============================================
+var LineIdStore = (function() {
+    // Map: textContent -> id
+    var textToId = Object.create(null);
+    // Map: id -> textContent (for reverse lookup)
+    var idToText = Object.create(null);
+    // Counter for generating new unique IDs
+    var nextId = 0;
+    
+    return {
+        // Get or create ID for given text content
+        getId: function(text) {
+            if (textToId[text] !== undefined) {
+                return textToId[text];
+            }
+            // New text, assign new unique ID
+            var newId = nextId++;
+            textToId[text] = newId;
+            idToText[newId] = text;
+            return newId;
+        },
+        
+        // Get text content by ID
+        getText: function(id) {
+            return idToText[id];
+        },
+        
+        // Reset store (for debugging)
+        reset: function() {
+            textToId = Object.create(null);
+            idToText = Object.create(null);
+            nextId = 0;
+        },
+        
+        // Get current state for debugging
+        getState: function() {
+            return {
+                textToId: textToId,
+                idToText: idToText,
+                nextId: nextId
+            };
+        }
+    };
+})();
+
 var editor = ace.edit("edt");
 editor.session.setOption("useWorker", false);
 editor.session.setMode("ace/mode/html");
@@ -73,34 +120,39 @@ function updateids() {
     var lines = editor.renderer.$textLayer.$lines;
     console.log('cells:', lines.cells);
     
-    var getData     = ({row, element, id}) => {
-        var content = element.textContent;
-        return {row, id, cont: content};
+    var getData = function(cell) {
+        var content = cell.element.textContent;
+        // Get or assign ID based on text content
+        var id = LineIdStore.getId(content);
+        return {row: cell.row, id: id, cont: content};
     }
-    var cells       = lines.cells.map(getData)
-    var cache       = lines.cellCache.map(({row, element, id}) => {
-        var content = element.textContent;
-        return {row, id, cont: content};
+    var cells = lines.cells.map(getData)
+    var cache = lines.cellCache.map(function(c) {
+        var content = c.element.textContent;
+        var id = LineIdStore.getId(content);
+        return {row: c.row, id: id, cont: content};
     })
 
     // отображение
     var _ids                = document.getElementById('ids')
     var _cells              = document.getElementById('cells')
     var _cellCache          = document.getElementById('cellCache')
-    _ids.innerHTML          = cells.map(c => `<div>id=${c.id} row=${c.row} "${c.cont}"</div>`).join('');
+    _ids.innerHTML          = cells.map(function(c) { 
+        return '<div>id=' + c.id + ' row=' + c.row + ' "' + c.cont + '"</div>';
+    }).join('');
     _cells.innerHTML        = JSON.stringify(cells, null, 2)
     _cellCache.innerHTML    = JSON.stringify(cache, null, 2)
 
 }
 
 // обновлять при изменении
-// editor.on('change', updateids);
+editor.on('change', updateids);
 // обновить после рендера
 editor.renderer.on("afterRender", updateids);
 
 
 // initial update
-// updateids();
+updateids();
 </script>
 </body>
 </html>
