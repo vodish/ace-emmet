@@ -15213,7 +15213,7 @@
               (this.cells = []),
               (this.cellCache = []),
               (this.$offsetCoefficient = 0),
-              (this.nextCellId = 1));
+              (this.nextCellId = 10));
           }
           return (
             (e.prototype.moveContainer = function (e) {
