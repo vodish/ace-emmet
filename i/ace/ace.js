@@ -16217,7 +16217,6 @@
                 if (c) {
                   var cell = this.$lines.cells[o];
                   if (cell) {
-                      cell.id = this.$lines.nextCellId++;
                       cell.row = u;
                   }
                   (this.dom.removeChildren(c),
